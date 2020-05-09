@@ -1,0 +1,229 @@
+/*
+M --- #326EE6 -> #89A7E4 -> #A0BDF4
+S --- #EEEEEE
+B --- #FF6159 -> #27CB3F
+*/
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    overflow-y: scroll; 
+}
+
+body{
+    background-color : #EEEEEE;
+    padding: 20px;
+}
+
+
+textarea {
+    width: 100%;
+    min-width: 100px;
+    height: 300px;
+    text-align: center;
+    border: 1px solid #EEEEEE;
+    resize: none;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 5px rgba(50,110,230,0.3);
+    -moz-box-shadow: inset 0 0 5px rgba(50,110,230,0.5); 
+    border-radius: 5px;
+}
+ 
+::-webkit-scrollbar-thumb {
+    -webkit-box-shadow: inset 0 0 5px rgba(50,110,230,0.5);
+    -moz-box-shadow: inset 0 0 5px rgba(50,110,230,0.5);
+    border-radius: 5px; 
+}
+
+#JSONTestd{
+    float:left;
+    margin-left: 20px;
+    width: 30%;
+}
+
+#Evad{
+    float: right;
+    margin-right: 20px;
+    width: 30%;
+}
+
+#WorldClockd{
+    left:50%;
+    position:absolute;
+    transform: translateX(-50%);
+    width: 30%;
+}
+
+#texta{
+    height: 350px;
+}
+
+#skol{
+    margin-right : 0px;
+}
+
+#testik, #show{
+    cursor: pointer;
+}
+
+.hlavni{
+    background-color: #FFFFFF;
+    margin: 20px 0px 20px 0px;
+    padding: 20px;
+    text-align: center;
+    color: #89A7E4;
+    min-width: 640px;
+    -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    -moz-box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+#double{
+    display: inline;
+    margin: 20px;
+}
+
+#predesle{
+    width: 64.5%;
+    float:left;
+    margin-right: 20px;
+}
+#legenda{
+    width: 30%;
+    float:left;
+    text-align: left;
+    min-width: 320px;
+}
+
+.hlavni button, #stop{
+    height: 35px;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+}
+
+.hlavni label{
+    font-size: 20px;
+}
+
+#stop{
+    background-color: #FF6159;
+    background-image: linear-gradient(to bottom right,#FF6159,#FF0000);
+    cursor: pointer;
+    color: #FFFFFF;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    height: 50px;
+    font-size: 20px;
+    border-radius: 5px;
+}
+
+#stop:hover{
+    background-color: #FF0000;
+    background-image: linear-gradient(to top left,#FF1010,#FF0000);
+    -webkit-box-shadow: 0 0 15px rgba(255,0,0,1);
+}
+
+.butX{
+    background-image: url("x.png");
+}
+
+.activeB:hover{
+    background-color: #326EE6;
+    color: #A0BDF4;
+}
+
+.activeB{
+    background-color: #EEEEEE;
+    color: #89A7E4;
+}
+
+.disabledB{
+    visibility: hidden;
+}
+
+#graf{
+    background-color: #FFFFFF;
+    visibility: hidden;
+}
+
+#top{
+    background-color: #326EE6;
+    background-image: linear-gradient(to top right,#326EE6, #89A7E4);
+    position: sticky;
+    top: 0;
+    height: 55px;
+    font-size: 40px;
+    padding: 5px;
+    padding-left: 50px;
+    color: #A0BDF4;
+    margin: -20px -20px 0 -20px;
+    z-index:1;
+    -webkit-box-shadow: 0 0 20px rgba(50,110,230,1);
+}
+
+.hlavni table{
+    color: #000000;
+    width: 100%;
+    padding: 5px;
+    border-collapse: collapse;
+    margin-bottom: 20px;;
+}
+
+.hlavni table tr{
+    border-bottom: 1px solid #EEEEEE;
+}
+
+.hlavni table .lastTr{
+    border-bottom: 1px solid #89A7E4;
+}
+
+.hlavni h1{
+    margin-bottom: 15px;
+}
+
+.hlavni table td{
+    padding:4px;
+}
+
+.hlavni table caption{
+    position: absolute;
+    left : 40px;
+    font-size: 20px;
+    color: #326EE6;
+}
+
+.hlavni table img{
+    cursor: pointer;
+}
+
+#obalT{
+    margin-left : 100px;
+}
+
+
+#predesle p{
+    font-size: 12px;
+    margin: 10px;
+}
+
+#predesle p:last-child{
+    color: #FF6159;
+    margin-bottom: 0px;
+}
+
+#predesle span{
+    font-size: 18px;
+}
+
+
+
