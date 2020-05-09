@@ -338,7 +338,7 @@ function computeSkew(packets){
     alpha = ((hull[j].y - hull[j - 1].y) / (hull[j].x - hull[j - 1].x));
     
     if (Math.abs(alpha) > 100) {
-        result.Alpha = Number(Alpha)*(-1);
+        result.Alpha = Number(alpha)*(-1);
         return result;
     }
 
