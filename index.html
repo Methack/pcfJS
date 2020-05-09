@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>PcFingerprinter Js</title>
+		<title>PC Fingerprinter JS</title>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	    <meta name="description" content="Clock skew calculation">
@@ -15,7 +15,7 @@
 	<body>
         <main>
             <div id="top">
-                <p><b>Nějaký název</b></p>
+                <p><b>PC Fingerprinter JS</b></p>
                 <button id="stop" onclick="stopIt();">Zastavit měření</button>
             </div>
             <div class="hlavni", id="texta">
@@ -45,7 +45,8 @@
                 </div>
                 <p>Zobrazuje se maximálně 5 meření pro každý server (vždy 4 s nejdelší dobou měření a jedno nejaktuálnější měření).</p>
                 <span id="bigStorage"></span>
-            <p id="testik" onclick="if(confirm('Opravdu chcete smazat všechny záznamy ?')){localStorage.clear();document.getElementById('predesle').style.visibility = 'hidden'}">Smazat celé localStorage</p>
+                <p id="show" onclick="showWholeStorage();">Zobrazit celé localStorage</p>
+                <p id="testik" onclick="if(confirm('Opravdu chcete smazat všechny záznamy ?')){localStorage.clear();document.getElementById('predesle').style.visibility = 'hidden'}">Smazat celé localStorage</p>
             </div>
             <div id="legenda" class="hlavni">
                 <h1>Legenda časů</h1>
@@ -69,7 +70,7 @@
             var EVstorage = [];
             var JTstorage = [];
             for (let index = 0; index < localStorage.length; index++) {
-                key = localStorage.key(index)
+                key = localStorage.key(index);
                 item = localStorage.getItem(key).split(",");
                 keys = key.split("-");
                 switch(keys[0]){
@@ -78,7 +79,7 @@
                     case "WorldClock" : {WCstorage.push({Time:keys[1], Alpha:Number(item[0]), Beta:Number(item[1]), MeasureTime:Number(item[2]), Key:key});break;}
                 }
             }
-            
+
             var storageMessage = "Je uloženo více měření pro :";
             if(JTstorage.length > 5){
                 var pastLen = JTstorage.length;

@@ -1,7 +1,7 @@
 //Tento soubor obsahuje pomocné funkce, primárně pro výpis dat z localStorage
 
 
-//Funkce vytváří nový elementy tabulky a vloží data z localStorage
+//Funkce vytváří nové elementy tabulky a vloží data z localStorage
 function printStorage(whichStorage, caption){
     for (let i = 0; i < whichStorage.length; i++) {
         tr = document.createElement("tr");
@@ -52,7 +52,7 @@ function printStorage(whichStorage, caption){
         if(i == whichStorage.length-1 && caption != "Eva")
             tr.className = "lastTr";
         switch(whichStorage.length){
-            case 1 :
+            default :
             case 2 : if(i == 0){addCaption(caption)};break;
             case 3 : 
             case 4 : if(i == 1){addCaption(caption)};break;
@@ -139,4 +139,32 @@ function stopIt(){
         EVdone = true;
         plotPoints(EVpackets, 0,"Eva"); 
     }  
+}
+
+//Vypíše všechny informace z localStorage
+function showWholeStorage(){
+    document.getElementById("bigStorage").style.visibility = "hidden";
+    document.getElementById("bigStorage").style.position = "absolute";
+    document.getElementById("show").style.visibility = "hidden";
+    document.getElementById("show").style.position = "absolute";
+
+    for (let index = 0; index < localStorage.length; index++) {
+        key = localStorage.key(index);
+        item = localStorage.getItem(key).split(",");
+        keys = key.split("-");
+        switch(keys[0]){
+            case "Eva" : {EVstorage.push({Time:keys[1], Alpha:Number(item[0]), Beta:Number(item[1]), MeasureTime:Number(item[2]), Key:key});break;}
+            case "JSONTest" : {JTstorage.push({Time:keys[1], Alpha:Number(item[0]), Beta:Number(item[1]), MeasureTime:Number(item[2]), Key:key});break;}
+            case "WorldClock" : {WCstorage.push({Time:keys[1], Alpha:Number(item[0]), Beta:Number(item[1]), MeasureTime:Number(item[2]), Key:key});break;}
+        }
+    }
+
+    var table = document.getElementById("TTab");
+    for(;table.childElementCount > 1;){
+        table.removeChild(table.lastChild);
+    }
+
+    printStorage(JTstorage, "JSONTest");
+    printStorage(WCstorage, "WorldClock");
+    printStorage(EVstorage, "Eva");
 }
