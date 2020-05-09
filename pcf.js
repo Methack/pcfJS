@@ -1,17 +1,17 @@
 //Rychlost posílání requestů v ms  
-var intervalTime = 1000;
+var intervalTime = 500;
 
 //Kolik musí minimálně mít packetů pro provádění výpočtů (v případě kdy již zná skew z předchozích měření)
 var minPacketCount = 100;
 
 //Kolik musí uběhnout času pro provádění výpočtu (v s) (v případě prvního měření na zařízení)
-var minTime = 1200;  //default asi 1200
+var minTime = 2000;  //default asi 1200
 
 //Určují jak často se bude volat počítání skew (v s)
 var callSkewComputeTime = 10;
 
 //Limit (v s) do kdy se musí stihnout vypočítat skew, jinak se výpočet zruší
-var endWhen = 1500;
+var endWhen = 2200;
 
 //Pomocné proměnné
 var maxTime = 0;
@@ -56,19 +56,19 @@ function CallThemAll(){
     if(maxTime > endWhen){
         clearInterval(interval);
         if(!JTdone){
-            document.getElementById("JSONTest").innerHTML = document.getElementById("JSONTest").innerHTML + '\n Výpočet se nepodařil';
+            document.getElementById("JSONTest").value += '\n Výpočet se nepodařil';
             document.getElementById("JSONTest").style.border = "1px dashed #FF6159";
             JTdone = true;
             plotPoints(JTpackets, 0, "JSONTest");
         }
         if(!WCdone){
-            document.getElementById("WorldClock").innerHTML = document.getElementById("WorldClock").innerHTML + '\n Výpočet se nepodařil';
+            document.getElementById("WorldClock").value += '\n Výpočet se nepodařil';
             document.getElementById("WorldClock").style.border = "1px dashed #FF6159";
             WCdone = true;
             plotPoints(WCpackets, 0,"WorldClock");
         }
         if(!EVdone){
-            document.getElementById("Eva").innerHTML = document.getElementById("Eva").innerHTML + '\n Výpočet se nepodařil';
+            document.getElementById("Eva").value += '\n Výpočet se nepodařil';
             document.getElementById("Eva").style.border = "1px dashed #FF6159";
             EVdone = true;
             plotPoints(EVpackets, 0,"Eva"); 
@@ -95,7 +95,7 @@ function CallThemAll(){
 function plotPoints(packets, lastKnownSkew, name){
     if(lastKnownSkew == 0)
         var lastKnownSkew = computeSkew(packets);
-    document.getElementById(name).innerHTML = document.getElementById(name).innerHTML + '\n '+lastKnownSkew.Alpha;
+    document.getElementById(name).value += '\n '+lastKnownSkew.Alpha;
     document.getElementById(name).scrollTop = document.getElementById(name).scrollHeight;
 
     var Pointx = [];
@@ -125,17 +125,17 @@ function checkAndPlot(packets, lastKnownSkew, name){
 
             switch(name){
                 case "WorldClock":
-                    document.getElementById("WorldClock").innerHTML = document.getElementById("WorldClock").innerHTML + '\n Výpočet dokončen';
+                    document.getElementById("WorldClock").value += '\n Výpočet dokončen';
                     document.getElementById("WorldClock").style.border = "1px dashed #27CB3F";
                     WCdone = true;
                     break;
                 case "JSONTest":
-                    document.getElementById("JSONTest").innerHTML = document.getElementById("JSONTest").innerHTML + '\n Výpočet dokončen';
+                    document.getElementById("JSONTest").value += '\n Výpočet dokončen';
                     document.getElementById("JSONTest").style.border = "1px dashed #27CB3F";
                     JTdone = true;
                     break;
                 case "Eva":
-                    document.getElementById("Eva").innerHTML = document.getElementById("Eva").innerHTML + '\n Výpočet dokončen';
+                    document.getElementById("Eva").value += '\n Výpočet dokončen';
                     document.getElementById("Eva").style.border = "1px dashed #27CB3F";
                     EVdone = true;
                     break;
@@ -157,7 +157,7 @@ function getJsonTest(){
     requestTest.onerror = function () {
         JTdone = true; //Pokud přijde error, noposílají se dále nové requesty
         document.getElementById("JTB").className = "activeB";
-        document.getElementById("JSONTest").innerHTML = document.getElementById("JSONTest").innerHTML + '\n Server je nefunkční';
+        document.getElementById("JSONTest").value += '\n Server je nefunkční';
         document.getElementById("JSONTest").scrollTop = document.getElementById("JSONTest").scrollHeight;
     }
     requestTest.onload = function () {
@@ -173,7 +173,7 @@ function getJsonTest(){
             var packet = {Client:client, Server:server, Offset:""};
             JTpackets.push(packet);
             setOffset(packet);
-            document.getElementById("JSONTest").innerHTML = document.getElementById("JSONTest").innerHTML + '\n' + server + ' -- ' + client;
+            document.getElementById("JSONTest").value += '\n' + server + ' -- ' + client;
             document.getElementById("JSONTest").scrollTop = document.getElementById("JSONTest").scrollHeight;
             maxTime = client;
         }
@@ -198,7 +198,7 @@ function getWorldClock(){
     requestClock.onerror = function () {
         WCdone = true; //Pokud přijde error, noposílají se dále nové requesty
         document.getElementById("WCB").className = "activeB";
-        document.getElementById("WorldClock").innerHTML = document.getElementById("WorldClock").innerHTML + '\n Server je nefunkční';
+        document.getElementById("WorldClock").value += '\n Server je nefunkční';
         document.getElementById("WorldClock").scrollTop = document.getElementById("WorldClock").scrollHeight;
     }
     requestClock.onload = function () {
@@ -214,7 +214,7 @@ function getWorldClock(){
             var packet = {Client:client, Server:server, Offset:""};
             WCpackets.push(packet);
             setOffset(packet);
-            document.getElementById("WorldClock").innerHTML = document.getElementById("WorldClock").innerHTML + '\n' + server + ' -- ' + client;
+            document.getElementById("WorldClock").value += '\n' + server + ' -- ' + client;
             document.getElementById("WorldClock").scrollTop = document.getElementById("WorldClock").scrollHeight;
             maxTime = client;
         }
@@ -238,7 +238,7 @@ function getSkolniServer(){
     requestSkol.onerror = function () {
         EVdone = true; //Pokud přijde error, noposílají se dále nové requesty
         document.getElementById("EVB").className = "activeB";
-        document.getElementById("Eva").innerHTML = document.getElementById("Eva").innerHTML + '\n Server je nefunkční';
+        document.getElementById("Eva").value += '\n Server je nefunkční';
         document.getElementById("Eva").scrollTop = document.getElementById("Eva").scrollHeight;
     }
     requestSkol.onload = function () {
@@ -254,7 +254,7 @@ function getSkolniServer(){
             var packet = {Client:client, Server:server, Offset:""};
             EVpackets.push(packet);
             setOffset(packet);
-            document.getElementById("Eva").innerHTML = document.getElementById("Eva").innerHTML + '\n' + server + ' -- ' + client;
+            document.getElementById("Eva").value += '\n' + server + ' -- ' + client;
             document.getElementById("Eva").scrollTop = document.getElementById("Eva").scrollHeight;
             maxTime = client;
         }
@@ -379,3 +379,10 @@ function computeSkew(packets){
     return result;
 }
 
+
+//občas to volá dvakrát po splnění podmínek pro výpočet
+
+
+//WorldTime nepoužitelný ? jak s tím v bakalářce
+//JSONtest vypadává večer
+//Ohraničení ze spoda

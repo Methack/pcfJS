@@ -122,19 +122,19 @@ function reduceStorageArray(whichStorage){
 //Nemusí clearovat interval, ten se clearne sám ve funkci CallThemAll()
 function stopIt(){
     if(!JTdone){
-        document.getElementById("JSONTest").innerHTML = document.getElementById("JSONTest").innerHTML + '\n Měření zrušeno';
+        document.getElementById("JSONTest").value += '\n Měření zrušeno';
         document.getElementById("JSONTest").style.border = "1px dashed #FF6159";
         JTdone = true;
         plotPoints(JTpackets, 0, "JSONTest");
     }
     if(!WCdone){
-        document.getElementById("WorldClock").innerHTML = document.getElementById("WorldClock").innerHTML + '\n Měření zrušeno';
+        document.getElementById("WorldClock").value += '\n Měření zrušeno';
         document.getElementById("WorldClock").style.border = "1px dashed #FF6159";
         WCdone = true;
         plotPoints(WCpackets, 0,"WorldClock");
     }
     if(!EVdone){
-        document.getElementById("Eva").innerHTML = document.getElementById("Eva").innerHTML + '\n Měření zrušeno';
+        document.getElementById("Eva").value += '\n Měření zrušeno';
         document.getElementById("Eva").style.border = "1px dashed #FF6159";
         EVdone = true;
         plotPoints(EVpackets, 0,"Eva"); 
