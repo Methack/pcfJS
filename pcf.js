@@ -120,7 +120,7 @@ function checkAndPlot(packets, lastKnownSkew, name){
     console.log(name +" ("+Math.round(packets[packets.length-1].Client)+"s) vypočítané skew je "+result.Alpha+"(ms/s), beta je "+result.Beta);
 
     if(lastKnownSkew.Alpha != 0){
-        if(Math.abs(lastKnownSkew.Alpha - result.Alpha) < 0.002 && Math.abs(result.Alpha) > 0.01){
+        if(Math.abs(lastKnownSkew.Alpha - result.Alpha) < 0.002 && Math.abs(result.Alpha) > 0.001){
             lastKnownSkew = result;
 
             switch(name){
@@ -180,7 +180,7 @@ function getJsonTest(){
     };
     requestTest.send();
     //Pokud je JTlastKnownSkew.Alpha 0 pak se porovnávají dvě naposledy vypočtené skew dokud se neustálí, Začne se počítat po uplinutí minTime
-    if(JTlastKnownSkew.Alpha == 0){
+    if(JTlastKnownSkew.Alpha == 0 || WCpackets[WCpackets.length-1].Client > minTime){
         if(JTpackets.length % callSkewCompute == 0 && JTpackets.length > minPacketCount && JTpackets[JTpackets.length-1].Client > minTime){
             JTlastComputedSkew = checkAndPlot(JTpackets, JTlastComputedSkew, "JSONTest");
         }
@@ -220,7 +220,7 @@ function getWorldClock(){
         }
     };
     requestClock.send();
-    if(WClastKnownSkew.Alpha == 0){
+    if(WClastKnownSkew.Alpha == 0 || WCpackets[WCpackets.length-1].Client > minTime){
         if(WCpackets.length % callSkewCompute == 0 && WCpackets.length > minPacketCount && WCpackets[WCpackets.length-1].Client > minTime){
             WClastComputedSkew = checkAndPlot(WCpackets, WClastComputedSkew, "WorldClock");
         }
@@ -260,7 +260,7 @@ function getSkolniServer(){
         }
     };
     requestSkol.send();
-    if(EVlastKnownSkew.Alpha == 0){
+    if(EVlastKnownSkew.Alpha == 0 || WCpackets[WCpackets.length-1].Client > minTime){
         if(EVpackets.length % callSkewCompute == 0 && EVpackets.length > minPacketCount && EVpackets[EVpackets.length-1].Client > minTime){
             EVlastComputedSkew = checkAndPlot(EVpackets, EVlastComputedSkew, "Eva");
         }
@@ -380,9 +380,6 @@ function computeSkew(packets){
 }
 
 
-//občas to volá dvakrát po splnění podmínek pro výpočet
 
 
-//WorldTime nepoužitelný ? jak s tím v bakalářce
-//JSONtest vypadává večer
-//Ohraničení ze spoda
+
