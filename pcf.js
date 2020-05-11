@@ -153,7 +153,7 @@ function checkAndPlot(packets, lastKnownSkew, name){
 // ----------------------------------------- JSONTestApi -----------------------------------------
 function getJsonTest(){
     var requestTest = new XMLHttpRequest();
-    requestTest.open('GET', 'http://time.jsontest.com/', true);
+    requestTest.open('GET', '//time.jsontest.com/', true);
     requestTest.onerror = function () {
         JTdone = true; //Pokud přijde error, noposílají se dále nové requesty
         document.getElementById("JTB").className = "activeB";
@@ -194,7 +194,7 @@ function getJsonTest(){
 // ----------------------------------------- WorldClockApi -----------------------------------------
 function getWorldClock(){
     var requestClock = new XMLHttpRequest();
-    requestClock.open('GET', 'http://www.worldclockapi.com/api/json/cet/now', true);
+    requestClock.open('GET', '//www.worldclockapi.com/api/json/cet/now', true);
     requestClock.onerror = function () {
         WCdone = true; //Pokud přijde error, noposílají se dále nové requesty
         document.getElementById("WCB").className = "activeB";
@@ -234,7 +234,7 @@ function getWorldClock(){
 // ----------------------------------------- Školní Server -----------------------------------------
 function getSkolniServer(){
     var requestSkol = new XMLHttpRequest();
-    requestSkol.open('GET', 'http://www.stud.fit.vutbr.cz/~xjires02/', true);
+    requestSkol.open('GET', '//www.stud.fit.vutbr.cz/~xjires02/', true);
     requestSkol.onerror = function () {
         EVdone = true; //Pokud přijde error, noposílají se dále nové requesty
         document.getElementById("EVB").className = "activeB";
