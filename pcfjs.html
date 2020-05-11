@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PC Fingerprinter JS</title>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	    <meta name="description" content="Clock skew calculation">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="styles/styles.css">
+		<link rel="icon" href="styles/ico.png" type="image/x-icon">
+        <script src="pcf.js"></script>
+        <script src="fce.js"></script>
+        <script src="plotly.min.js"></script>
+    </head>
+	<body>
+        <main>
+            <div id="top">
+                <p><b>PC Fingerprinter JS</b></p>
+                <button id="stop" onclick="stopIt();">Zastavit měření</button>
+            </div>
+            <div class="hlavni", id="texta">
+                <div id="JSONTestd">
+                    <label>JSONTestApi</label>
+                    <textarea id="JSONTest" readonly="readonly"></textarea>
+                    <button onclick="if(JTdone){JTdone = false;document.getElementById('JTB').className = 'disabledB';}" class="disabledB" id="JTB">Zkusit JSONTest znovu</button>
+                </div>
+                <div id="WorldClockd">
+                    <label>WorldClockApi</label>
+                    <textarea id="WorldClock" readonly="readonly"></textarea>
+                    <button onclick="if(WCdone){WCdone = false;document.getElementById('WCB').className = 'disabledB';}" class="disabledB" id="WCB">Zkusit WorldClock znovu</button>
+                </div>
+                <div id="Evad">
+                    <label>Eva</label>
+                    <textarea id="Eva" readonly="readonly"></textarea>
+                    <button onclick="if(EVdone){EVdone = false;document.getElementById('EVB').className = 'disabledB';}" class="disabledB" id="EVB">Zkusit Evu znovu</button>
+                </div>
+            </div>
+            <div id="graf"></div>
+            <div id="predesle" class="hlavni">
+                <h1>Předešlá měření</h1>
+                <div id="obalT">
+                    <table id="TTab">
+                        <tr><th>Den</th><th>Čas</th><th>Doba měření</th><th>Alfa</th><th>Beta</th><th>Smazat</th></tr>
+                    </table>
+                </div>
+                <p>Zobrazuje se maximálně 5 meření pro každý server (vždy 4 s nejdelší dobou měření a jedno nejaktuálnější měření).</p>
+                <span id="bigStorage"></span>
+                <p id="show" onclick="showWholeStorage();">Zobrazit celé localStorage</p>
+                <p id="testik" onclick="if(confirm('Opravdu chcete smazat všechny záznamy ?')){localStorage.clear();document.getElementById('predesle').style.visibility = 'hidden'}">Smazat celé localStorage</p>
+            </div>
+            <div id="legenda" class="hlavni">
+                <h1>Legenda časů</h1>
+                <p><b>Date.now</b> -- čas v milisekundách</p>
+                <p><b>performance.now</b> -- čas v mikrosekundách (Firefox zaokrouhluje na milisekundy)</p>
+                <p><b>JSONTestApi</b> -- čas v milisekundách (čas od Unixové epochy)</p>
+                <p><b>WorldClockApi</b> -- počet 100 nanosekundových intervalů od 1. Ledna 1601</p>
+                <p><b>Eva</b> -- posílá čas pomocí funkce hrtime -> čas v nanosekundách</p>
+            </div>
+        </main>
+        <script>
+
+        CallThemAll();
+        var interval = setInterval(CallThemAll, (intervalTime));
+
+        if(localStorage.length != 0){
+            var item = {Alpha:"", Beta:""};
+            var key;
+            var id = 1;
+            var WCstorage = [];
+            var EVstorage = [];
+            var JTstorage = [];
+            for (let index = 0; index < localStorage.length; index++) {
+                key = localStorage.key(index);
+                item = localStorage.getItem(key).split(",");
+                keys = key.split("-");
+                switch(keys[0]){
+                    case "Eva" : {EVstorage.push({Time:keys[1], Alpha:Number(item[0]), Beta:Number(item[1]), MeasureTime:Number(item[2]), Key:key});break;}
+                    case "JSONTest" : {JTstorage.push({Time:keys[1], Alpha:Number(item[0]), Beta:Number(item[1]), MeasureTime:Number(item[2]), Key:key});break;}
+                    case "WorldClock" : {WCstorage.push({Time:keys[1], Alpha:Number(item[0]), Beta:Number(item[1]), MeasureTime:Number(item[2]), Key:key});break;}
+                }
+            }
+
+            var storageMessage = "Je uloženo více měření pro :";
+            if(JTstorage.length > 5){
+                var pastLen = JTstorage.length;
+                JTstorage = reduceStorageArray(JTstorage);
+                storageMessage += " JSONTest("+(pastLen-5)+")";
+                document.getElementById("show").style.visibility = "visible";
+                document.getElementById("show").style.position = "static";
+            }
+            printStorage(JTstorage, "JSONTest");
+
+            if(WCstorage.length > 5){
+                var pastLen = WCstorage.length;
+                WCstorage = reduceStorageArray(WCstorage);
+                storageMessage += " WorldClock("+(pastLen-5)+")";
+                document.getElementById("show").style.visibility = "visible";
+                document.getElementById("show").style.position = "static";
+            }
+            printStorage(WCstorage, "WorldClock");
+            
+            if(EVstorage.length > 5){
+                var pastLen = EVstorage.length;
+                EVstorage = reduceStorageArray(EVstorage);
+                storageMessage += " Evu("+(pastLen-5)+")";
+                document.getElementById("show").style.visibility = "visible";
+                document.getElementById("show").style.position = "static";
+            }
+            printStorage(EVstorage, "Eva");
+
+            if(storageMessage != "Je uloženo více měření pro :")      
+                document.getElementById("bigStorage").innerHTML = storageMessage;
+
+            EVlastKnownSkew = getLastKnownSkew(EVstorage);
+            JTlastKnownSkew = getLastKnownSkew(JTstorage);
+            WClastKnownSkew = getLastKnownSkew(WCstorage);
+
+        }else{
+            document.getElementById("predesle").style.visibility = "hidden";
+            document.getElementById("predesle").style.position = "absolute";
+        }
+        
+        </script>
+    </body>
+</html>

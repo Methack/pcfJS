@@ -122,19 +122,19 @@ function reduceStorageArray(whichStorage){
 //Nemusí clearovat interval, ten se clearne sám ve funkci CallThemAll()
 function stopIt(){
     if(!JTdone){
-        document.getElementById("JSONTest").value += '\n Měření zrušeno';
+        document.getElementById("JSONTest").value += '\n M\u011B\u0159en\u00ED zru\u0161eno';
         document.getElementById("JSONTest").style.border = "1px dashed #FF6159";
         JTdone = true;
         plotPoints(JTpackets, 0, "JSONTest");
     }
     if(!WCdone){
-        document.getElementById("WorldClock").value += '\n Měření zrušeno';
+        document.getElementById("WorldClock").value += '\n M\u011B\u0159en\u00ED zru\u0161eno';
         document.getElementById("WorldClock").style.border = "1px dashed #FF6159";
         WCdone = true;
         plotPoints(WCpackets, 0,"WorldClock");
     }
     if(!EVdone){
-        document.getElementById("Eva").value += '\n Měření zrušeno';
+        document.getElementById("Eva").value += '\n M\u011B\u0159en\u00ED zru\u0161eno';
         document.getElementById("Eva").style.border = "1px dashed #FF6159";
         EVdone = true;
         plotPoints(EVpackets, 0,"Eva"); 
@@ -147,6 +147,10 @@ function showWholeStorage(){
     document.getElementById("bigStorage").style.position = "absolute";
     document.getElementById("show").style.visibility = "hidden";
     document.getElementById("show").style.position = "absolute";
+    
+    JTstorage = [];
+    WCstorage = [];
+    EVstorage = [];
 
     for (let index = 0; index < localStorage.length; index++) {
         key = localStorage.key(index);

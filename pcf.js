@@ -1,17 +1,17 @@
 //Rychlost posílání requestů v ms  
-var intervalTime = 500;
+var intervalTime = 1000;
 
 //Kolik musí minimálně mít packetů pro provádění výpočtů (v případě kdy již zná skew z předchozích měření)
 var minPacketCount = 100;
 
 //Kolik musí uběhnout času pro provádění výpočtu (v s) (v případě prvního měření na zařízení)
-var minTime = 2000;  //default asi 1200
+var minTime = 1200;  //default asi 1200
 
 //Určují jak často se bude volat počítání skew (v s)
 var callSkewComputeTime = 10;
 
 //Limit (v s) do kdy se musí stihnout vypočítat skew, jinak se výpočet zruší
-var endWhen = 2200;
+var endWhen = 1500;
 
 //Pomocné proměnné
 var maxTime = 0;
@@ -56,19 +56,19 @@ function CallThemAll(){
     if(maxTime > endWhen){
         clearInterval(interval);
         if(!JTdone){
-            document.getElementById("JSONTest").value += '\n Výpočet se nepodařil';
+            document.getElementById("JSONTest").value += '\n V\u00FDpo\u010Det se nepoda\u0159il';
             document.getElementById("JSONTest").style.border = "1px dashed #FF6159";
             JTdone = true;
             plotPoints(JTpackets, 0, "JSONTest");
         }
         if(!WCdone){
-            document.getElementById("WorldClock").value += '\n Výpočet se nepodařil';
+            document.getElementById("WorldClock").value += '\n V\u00FDpo\u010Det se nepoda\u0159il';
             document.getElementById("WorldClock").style.border = "1px dashed #FF6159";
             WCdone = true;
             plotPoints(WCpackets, 0,"WorldClock");
         }
         if(!EVdone){
-            document.getElementById("Eva").value += '\n Výpočet se nepodařil';
+            document.getElementById("Eva").value += '\n V\u00FDpo\u010Det se nepoda\u0159il';
             document.getElementById("Eva").style.border = "1px dashed #FF6159";
             EVdone = true;
             plotPoints(EVpackets, 0,"Eva"); 
@@ -125,17 +125,17 @@ function checkAndPlot(packets, lastKnownSkew, name){
 
             switch(name){
                 case "WorldClock":
-                    document.getElementById("WorldClock").value += '\n Výpočet dokončen';
+                    document.getElementById("WorldClock").value += '\n V\u00FDpo\u010Det dokon\u010Den';
                     document.getElementById("WorldClock").style.border = "1px dashed #27CB3F";
                     WCdone = true;
                     break;
                 case "JSONTest":
-                    document.getElementById("JSONTest").value += '\n Výpočet dokončen';
+                    document.getElementById("JSONTest").value += '\n V\u00FDpo\u010Det dokon\u010Den';
                     document.getElementById("JSONTest").style.border = "1px dashed #27CB3F";
                     JTdone = true;
                     break;
                 case "Eva":
-                    document.getElementById("Eva").value += '\n Výpočet dokončen';
+                    document.getElementById("Eva").value += '\n V\u00FDpo\u010Det dokon\u010Den';
                     document.getElementById("Eva").style.border = "1px dashed #27CB3F";
                     EVdone = true;
                     break;
@@ -153,12 +153,14 @@ function checkAndPlot(packets, lastKnownSkew, name){
 // ----------------------------------------- JSONTestApi -----------------------------------------
 function getJsonTest(){
     var requestTest = new XMLHttpRequest();
-    requestTest.open('GET', '//time.jsontest.com/', true);
+    requestTest.open('GET', 'http://time.jsontest.com/', true);
     requestTest.onerror = function () {
-        JTdone = true; //Pokud přijde error, noposílají se dále nové requesty
-        document.getElementById("JTB").className = "activeB";
-        document.getElementById("JSONTest").value += '\n Server je nefunkční';
-        document.getElementById("JSONTest").scrollTop = document.getElementById("JSONTest").scrollHeight;
+        if(!JTdone){
+            JTdone = true; //Pokud přijde error, noposílají se dále nové requesty
+            document.getElementById("JTB").className = "activeB";
+            document.getElementById("JSONTest").value += '\n Server je nefunk\u010Dn\u00ED';
+            document.getElementById("JSONTest").scrollTop = document.getElementById("JSONTest").scrollHeight;
+        }
     }
     requestTest.onload = function () {
         var cas = performance.now();
@@ -179,14 +181,16 @@ function getJsonTest(){
         }
     };
     requestTest.send();
-    //Pokud je JTlastKnownSkew.Alpha 0 pak se porovnávají dvě naposledy vypočtené skew dokud se neustálí, Začne se počítat po uplinutí minTime
-    if(JTlastKnownSkew.Alpha == 0 || WCpackets[WCpackets.length-1].Client > minTime){
-        if(JTpackets.length % callSkewCompute == 0 && JTpackets.length > minPacketCount && JTpackets[JTpackets.length-1].Client > minTime){
-            JTlastComputedSkew = checkAndPlot(JTpackets, JTlastComputedSkew, "JSONTest");
-        }
-    }else{ //Pokud JTlastKnownSkew.Alpha není 0, pak už známe skew z minulé session porovnáváme toto skew s nově vypočteným dokud se jejich rozdíl nedostane pod hranici
-        if(JTpackets.length % callSkewCompute == 0 && JTpackets.length > minPacketCount){
-            checkAndPlot(JTpackets, JTlastKnownSkew, "JSONTest");
+    if(JTpackets.length > minPacketCount){
+        //Pokud je JTlastKnownSkew.Alpha 0 pak se porovnávají dvě naposledy vypočtené skew dokud se neustálí, Začne se počítat po uplinutí minTime
+        if(JTlastKnownSkew.Alpha == 0 || JTpackets[JTpackets.length-1].Client > minTime){
+            if(JTpackets.length % callSkewCompute == 0 && JTpackets[JTpackets.length-1].Client > minTime){
+                JTlastComputedSkew = checkAndPlot(JTpackets, JTlastComputedSkew, "JSONTest");
+            }
+        }else{ //Pokud JTlastKnownSkew.Alpha není 0, pak už známe skew z minulé session porovnáváme toto skew s nově vypočteným dokud se jejich rozdíl nedostane pod hranici
+            if(JTpackets.length % callSkewCompute == 0){
+                checkAndPlot(JTpackets, JTlastKnownSkew, "JSONTest");
+            }
         }
     }
 }
@@ -194,12 +198,14 @@ function getJsonTest(){
 // ----------------------------------------- WorldClockApi -----------------------------------------
 function getWorldClock(){
     var requestClock = new XMLHttpRequest();
-    requestClock.open('GET', '//www.worldclockapi.com/api/json/cet/now', true);
+    requestClock.open('GET', 'http://www.worldclockapi.com/api/json/cet/now', true);
     requestClock.onerror = function () {
-        WCdone = true; //Pokud přijde error, noposílají se dále nové requesty
-        document.getElementById("WCB").className = "activeB";
-        document.getElementById("WorldClock").value += '\n Server je nefunkční';
-        document.getElementById("WorldClock").scrollTop = document.getElementById("WorldClock").scrollHeight;
+        if(!WCdone){
+            WCdone = true; //Pokud přijde error, noposílají se dále nové requesty
+            document.getElementById("WCB").className = "activeB";
+            document.getElementById("WorldClock").value += '\n Server je nefunk\u010Dn\u00ED';
+            document.getElementById("WorldClock").scrollTop = document.getElementById("WorldClock").scrollHeight;
+        }
     }
     requestClock.onload = function () {
         var cas = performance.now();
@@ -220,13 +226,15 @@ function getWorldClock(){
         }
     };
     requestClock.send();
-    if(WClastKnownSkew.Alpha == 0 || WCpackets[WCpackets.length-1].Client > minTime){
-        if(WCpackets.length % callSkewCompute == 0 && WCpackets.length > minPacketCount && WCpackets[WCpackets.length-1].Client > minTime){
-            WClastComputedSkew = checkAndPlot(WCpackets, WClastComputedSkew, "WorldClock");
-        }
-    }else{
-        if(WCpackets.length % callSkewCompute == 0 && WCpackets.length > minPacketCount){
-            checkAndPlot(WCpackets, WClastKnownSkew, "WorldClock");
+     if(WCpackets.length > minPacketCount){
+        if(WClastKnownSkew.Alpha == 0 || WCpackets[WCpackets.length-1].Client > minTime){
+            if(WCpackets.length % callSkewCompute == 0 && WCpackets[WCpackets.length-1].Client > minTime){
+                WClastComputedSkew = checkAndPlot(WCpackets, WClastComputedSkew, "WorldClock");
+            }
+        }else{
+            if(WCpackets.length % callSkewCompute == 0){
+                checkAndPlot(WCpackets, WClastKnownSkew, "WorldClock");
+            }
         }
     }
 }
@@ -234,12 +242,14 @@ function getWorldClock(){
 // ----------------------------------------- Školní Server -----------------------------------------
 function getSkolniServer(){
     var requestSkol = new XMLHttpRequest();
-    requestSkol.open('GET', '//www.stud.fit.vutbr.cz/~xjires02/', true);
+    requestSkol.open('GET', 'http://www.stud.fit.vutbr.cz/~xjires02/', true);
     requestSkol.onerror = function () {
-        EVdone = true; //Pokud přijde error, noposílají se dále nové requesty
-        document.getElementById("EVB").className = "activeB";
-        document.getElementById("Eva").value += '\n Server je nefunkční';
-        document.getElementById("Eva").scrollTop = document.getElementById("Eva").scrollHeight;
+        if(!EVdone){
+            EVdone = true; //Pokud přijde error, noposílají se dále nové requesty
+            document.getElementById("EVB").className = "activeB";
+            document.getElementById("Eva").value += '\n Server je nefunk\u010Dn\u00ED';
+            document.getElementById("Eva").scrollTop = document.getElementById("Eva").scrollHeight;
+        }
     }
     requestSkol.onload = function () {
         var cas = performance.now();
@@ -260,13 +270,15 @@ function getSkolniServer(){
         }
     };
     requestSkol.send();
-    if(EVlastKnownSkew.Alpha == 0 || WCpackets[WCpackets.length-1].Client > minTime){
-        if(EVpackets.length % callSkewCompute == 0 && EVpackets.length > minPacketCount && EVpackets[EVpackets.length-1].Client > minTime){
-            EVlastComputedSkew = checkAndPlot(EVpackets, EVlastComputedSkew, "Eva");
-        }
-    }else{
-        if(EVpackets.length % callSkewCompute == 0 && EVpackets.length > minPacketCount){
-            checkAndPlot(EVpackets, EVlastKnownSkew, "Eva");
+    if(EVpackets.length > minPacketCount){
+        if(EVlastKnownSkew.Alpha == 0 || WCpackets[WCpackets.length-1].Client > minTime){
+            if(EVpackets.length % callSkewCompute == 0 && EVpackets[EVpackets.length-1].Client > minTime){
+                EVlastComputedSkew = checkAndPlot(EVpackets, EVlastComputedSkew, "Eva");
+            }
+        }else{
+            if(EVpackets.length % callSkewCompute == 0){
+                checkAndPlot(EVpackets, EVlastKnownSkew, "Eva");
+            }
         }
     }
 }

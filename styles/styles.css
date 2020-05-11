@@ -71,6 +71,11 @@ textarea {
     margin-right : 0px;
 }
 
+#show{
+    visibility: hidden;
+    position: absolute;
+}
+
 #testik, #show{
     cursor: pointer;
 }
