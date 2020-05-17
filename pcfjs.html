@@ -16,45 +16,58 @@
         <main>
             <div id="top">
                 <p><b>PC Fingerprinter JS</b></p>
-                <button id="stop" onclick="stopIt();">Zastavit měření</button>
+                <span id="graphUpdate">Graph update in : 00s</span>
+                <button id="stop" onclick="stopIt();">Stop</button>
             </div>
             <div class="hlavni", id="texta">
                 <div id="JSONTestd">
-                    <label>JSONTestApi</label>
-                    <textarea id="JSONTest" readonly="readonly"></textarea>
-                    <button onclick="if(JTdone){JTdone = false;document.getElementById('JTB').className = 'disabledB';}" class="disabledB" id="JTB">Zkusit JSONTest znovu</button>
+                    <label>JSONTest</label>
+                    <textarea id="JSONTest" readonly="readonly">ServerTimeSinceStart -- ClientTimeSinceStart</textarea>
+                    <div class="ttip">
+                        <p id="JSONTestskew">Skew is </p>
+                        <span id="JSONTesttip"></span>
+                    </div>
+                    <button onclick="if(JTdone){errorButton('JTB');}" class="disabledB" id="JTB">Try JSONTest again</button>
                 </div>
                 <div id="WorldClockd">
-                    <label>WorldClockApi</label>
-                    <textarea id="WorldClock" readonly="readonly"></textarea>
-                    <button onclick="if(WCdone){WCdone = false;document.getElementById('WCB').className = 'disabledB';}" class="disabledB" id="WCB">Zkusit WorldClock znovu</button>
+                    <label>WorldClock</label>
+                    <textarea id="WorldClock" readonly="readonly">ServerTimeSinceStart -- ClientTimeSinceStart</textarea>
+                    <div class="ttip">
+                        <p id="WorldClockskew">Skew is </p>
+                        <span id="WorldClocktip"></span>
+                    </div>
+                    <button onclick="if(WCdone){errorButton('WCB');}" class="disabledB" id="WCB">Try WorldClock again</button>
                 </div>
                 <div id="Evad">
                     <label>Eva</label>
-                    <textarea id="Eva" readonly="readonly"></textarea>
-                    <button onclick="if(EVdone){EVdone = false;document.getElementById('EVB').className = 'disabledB';}" class="disabledB" id="EVB">Zkusit Evu znovu</button>
+                    <textarea id="Eva" readonly="readonly">ServerTimeSinceStart -- ClientTimeSinceStart</textarea>
+                    <div class="ttip">
+                        <p id="Evaskew">Skew is </p>
+                        <span id="Evatip"></span>
+                    </div>
+                    <button onclick="if(EVdone){errorButton('EVB');}" class="disabledB" id="EVB">Try Evu again</button>
                 </div>
             </div>
-            <div id="graf"></div>
+            <div id="graf" class="hlavni"></div>
             <div id="predesle" class="hlavni">
-                <h1>Předešlá měření</h1>
+                <h1>Previous measurements</h1>
                 <div id="obalT">
                     <table id="TTab">
-                        <tr><th>Den</th><th>Čas</th><th>Doba měření</th><th>Alfa</th><th>Beta</th><th>Smazat</th></tr>
+                        <tr><th>Date</th><th>Time [h:m:s]</th><th>Measurement time [s]</th><th>Skew [ppm]</th><th>Delete</th></tr>
                     </table>
                 </div>
-                <p>Zobrazuje se maximálně 5 meření pro každý server (vždy 4 s nejdelší dobou měření a jedno nejaktuálnější měření).</p>
+                <p id="onlyfive">Maximum of 5 measurements for each server are shown (4 with longest measurement time and 1 most recent).</p>
                 <span id="bigStorage"></span>
-                <p id="show" onclick="showWholeStorage();">Zobrazit celé localStorage</p>
-                <p id="testik" onclick="if(confirm('Opravdu chcete smazat všechny záznamy ?')){localStorage.clear();document.getElementById('predesle').style.visibility = 'hidden'}">Smazat celé localStorage</p>
+                <p id="show" onclick="showWholeStorage();">Show all measurement records</p>
+                <p id="testik" onclick="if(confirm('Are you sure you want to delete all records ?')){localStorage.clear();document.getElementById('predesle').style.visibility = 'hidden';document.getElementById('predesle').style.position = 'absolute'}">Delete all measurement records</p>
             </div>
             <div id="legenda" class="hlavni">
-                <h1>Legenda časů</h1>
-                <p><b>Date.now</b> -- čas v milisekundách</p>
-                <p><b>performance.now</b> -- čas v mikrosekundách (Firefox zaokrouhluje na milisekundy)</p>
-                <p><b>JSONTestApi</b> -- čas v milisekundách (čas od Unixové epochy)</p>
-                <p><b>WorldClockApi</b> -- počet 100 nanosekundových intervalů od 1. Ledna 1601</p>
-                <p><b>Eva</b> -- posílá čas pomocí funkce hrtime -> čas v nanosekundách</p>
+                <h1>Time legend</h1>
+                <p><b>Date.now</b> -- time in miliseconds</p>
+                <p><b>performance.now</b> -- time in mikroseconds (by default Firefox rounds to miliseconds)</p>
+                <p><b>JSONTest</b> -- time in miliseconds (time since Unix epoch) (<a href="http://time.jsontest.com/" target="_blank">http://time.jsontest.com/</a>)</p>
+                <p><b>WorldClock</b> -- number of 100 nanosecond intervals since January 1st, 1601 (<a href="http://www.worldclockapi.com/api/json/cet/now" target="_blank">http://www.worldclockapi.com/api/json/cet/now</a>)</p>
+                <p><b>Eva</b> -- gets time with hrtime php function -> time in nanoseconds (<a href="http://www.stud.fit.vutbr.cz/~xjires02/" target="_blank">http://www.stud.fit.vutbr.cz/~xjires02/</a>)</p>
             </div>
         </main>
         <script>
@@ -65,7 +78,7 @@
         if(localStorage.length != 0){
             var item = {Alpha:"", Beta:""};
             var key;
-            var id = 1;
+            var id = 0;
             var WCstorage = [];
             var EVstorage = [];
             var JTstorage = [];
@@ -80,7 +93,7 @@
                 }
             }
 
-            var storageMessage = "Je uloženo více měření pro :";
+            var storageMessage = "More measurement records aren't shown :";
             if(JTstorage.length > 5){
                 var pastLen = JTstorage.length;
                 JTstorage = reduceStorageArray(JTstorage);
@@ -102,13 +115,13 @@
             if(EVstorage.length > 5){
                 var pastLen = EVstorage.length;
                 EVstorage = reduceStorageArray(EVstorage);
-                storageMessage += " Evu("+(pastLen-5)+")";
+                storageMessage += " Eva("+(pastLen-5)+")";
                 document.getElementById("show").style.visibility = "visible";
                 document.getElementById("show").style.position = "static";
             }
             printStorage(EVstorage, "Eva");
 
-            if(storageMessage != "Je uloženo více měření pro :")      
+            if(storageMessage != "More measurement records aren't shown :")      
                 document.getElementById("bigStorage").innerHTML = storageMessage;
 
             EVlastKnownSkew = getLastKnownSkew(EVstorage);

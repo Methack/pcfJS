@@ -45,26 +45,28 @@ textarea {
 }
 
 #JSONTestd{
-    float:left;
-    margin-left: 20px;
+    margin: 0 30px 0 15px;
     width: 30%;
+    display: inline-block;
+    height: 354px;
 }
 
 #Evad{
-    float: right;
-    margin-right: 20px;
+    margin: 0 15px 0 25px;
     width: 30%;
+    display: inline-block;
+    height: 354px;
 }
 
 #WorldClockd{
-    left:50%;
-    position:absolute;
-    transform: translateX(-50%);
     width: 30%;
+    display: inline-block;
+    height: 354px;
 }
 
 #texta{
-    height: 350px;
+    position: relative;
+    width: auto;
 }
 
 #skol{
@@ -86,7 +88,7 @@ textarea {
     padding: 20px;
     text-align: center;
     color: #89A7E4;
-    min-width: 640px;
+    min-width: 1000px;
     -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.2);
     -moz-box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
@@ -97,15 +99,15 @@ textarea {
 }
 
 #predesle{
-    width: 64.5%;
+    width: 50%;
     float:left;
     margin-right: 20px;
 }
 #legenda{
-    width: 30%;
+    width: 40%;
     float:left;
     text-align: left;
-    min-width: 320px;
+    min-width: 560px;
 }
 
 .hlavni button, #stop{
@@ -119,6 +121,10 @@ textarea {
     font-size: 20px;
 }
 
+.hlavni a{
+    color: #89A7E4;
+}
+
 #stop{
     background-color: #FF6159;
     background-image: linear-gradient(to bottom right,#FF6159,#FF0000);
@@ -130,6 +136,7 @@ textarea {
     height: 50px;
     font-size: 20px;
     border-radius: 5px;
+    width: 100px;
 }
 
 #stop:hover{
@@ -156,9 +163,15 @@ textarea {
     visibility: hidden;
 }
 
+#WCB, #JTB, #EVB{
+    position: absolute;
+}
+
 #graf{
     background-color: #FFFFFF;
     visibility: hidden;
+    z-index: -1;
+    padding: 0px;
 }
 
 #top{
@@ -174,6 +187,15 @@ textarea {
     margin: -20px -20px 0 -20px;
     z-index:1;
     -webkit-box-shadow: 0 0 20px rgba(50,110,230,1);
+    min-width: 1020px;
+}
+
+#top span{
+    font-size: 20px;
+    left:50%;
+    position:absolute;
+    transform: translateX(-50%);
+    top: 20px;
 }
 
 .hlavni table{
@@ -194,6 +216,18 @@ textarea {
 
 .hlavni h1{
     margin-bottom: 15px;
+}
+
+.hlavni div p{
+    visibility: hidden;
+    position:absolute;
+    font-size: 10px;
+    bottom: 0px;
+    width: 100%;
+}
+
+.hlavni h2 span{
+    color: #326EE6;
 }
 
 .hlavni table td{
@@ -230,5 +264,40 @@ textarea {
     font-size: 18px;
 }
 
+/* W3Schools tooltip https://www.w3schools.com/css/css_tooltip.asp */
+.ttip{
+    position: relative;
+    height: 25px;
+}
+
+.ttip .ttiptext {
+    visibility: hidden;
+    width: 300px;
+    background-color: #FFFFFF;
+    padding: 5px;
+    border-radius: 8px;
+    border: 2px solid #326EE6;
+    position: absolute;
+    z-index: 1;
+    top: 150%;
+    left: 50%;
+    margin-left: -150px;
+}
+
+.ttip .ttiptext::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 8px;
+    border-style: solid;
+    border-color:  transparent transparent #326EE6 transparent;
+}
+
+.ttip:hover .ttiptext {
+    visibility: visible;
+    opacity: 1;
+}
 
 

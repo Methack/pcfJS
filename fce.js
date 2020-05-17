@@ -4,6 +4,7 @@
 //Funkce vytváří nové elementy tabulky a vloží data z localStorage
 function printStorage(whichStorage, caption){
     for (let i = 0; i < whichStorage.length; i++) {
+        id++;
         tr = document.createElement("tr");
         var trid = "tr"+id;
         var prevtr = "tr"+(id-1);
@@ -16,17 +17,15 @@ function printStorage(whichStorage, caption){
         var tdden = document.createElement("td");
         tdden.innerHTML = cas.toLocaleDateString();
         var tdmereni = document.createElement("td");
-        tdmereni.innerHTML = whichStorage[i].MeasureTime+" s";
+        tdmereni.innerHTML = whichStorage[i].MeasureTime;
         var tdalpha = document.createElement("td");
-        tdalpha.innerHTML = whichStorage[i].Alpha;
-        var tdbeta = document.createElement("td");
-        tdbeta.innerHTML = whichStorage[i].Beta;
+        tdalpha.innerHTML = (Number(whichStorage[i].Alpha)*1000).toFixed(6);
         var tdbutton = document.createElement("td");
         var x = document.createElement("img");
         x.onclick = function () {
-            if(confirm("Opravdu chcete tento záznam smazat ("+whichStorage[i].Key+")?")){
+            if(confirm("Are you sure you want to delete this record ("+whichStorage[i].Key+")?")){
                 localStorage.removeItem(whichStorage[i].Key);
-                var tr = document.getElementById(trid);
+                var tr = this.parentNode.parentNode;
                 document.getElementById("TTab").removeChild(tr);
                 if(tr.className == "lastTr" && whichStorage.length > 1){
                     document.getElementById(prevtr).className = "lastTr";
@@ -47,7 +46,6 @@ function printStorage(whichStorage, caption){
         tr.appendChild(tdcas);
         tr.appendChild(tdmereni);
         tr.appendChild(tdalpha);
-        tr.appendChild(tdbeta);
         tr.appendChild(tdbutton);
         if(i == whichStorage.length-1 && caption != "Eva")
             tr.className = "lastTr";
@@ -59,7 +57,6 @@ function printStorage(whichStorage, caption){
             case 5 : if(i == 2){addCaption(caption)};break;
         }
         document.getElementById("TTab").appendChild(tr);
-        id++;
     }
 }
 
@@ -119,26 +116,68 @@ function reduceStorageArray(whichStorage){
 }
 
 //Funkce zastaví zasílání packetů, tím zruší měření. Po ukončení měření se plotnou body. 
-//Nemusí clearovat interval, ten se clearne sám ve funkci CallThemAll()
 function stopIt(){
     if(!JTdone){
-        document.getElementById("JSONTest").value += '\n M\u011B\u0159en\u00ED zru\u0161eno';
+        document.getElementById("JSONTest").value += '\n Measuring stopped';
         document.getElementById("JSONTest").style.border = "1px dashed #FF6159";
+        document.getElementById("JSONTest").scrollTop = document.getElementById("JSONTest").scrollHeight;
         JTdone = true;
-        plotPoints(JTpackets, 0, "JSONTest");
+        plotPoints(JTpackets, 0, "JSONTest", true, JTlastKnownSkew);
+    }else if(JTerror){
+        if(document.getElementById("JSONTestskew").style.visibility = "hidden"){
+            document.getElementById("JSONTestskew").innerHTML = "Couldn't compute skew";
+            document.getElementById("JSONTestskew").style.position = 'static';
+            document.getElementById("JSONTestskew").style.visibility = 'visible';
+            document.getElementById("JSONTestskew").style.fontSize = "20px";
+            document.getElementById("JSONTest").style.border = "1px dashed #FF6159";
+        }
+    }else{
+        doPlot(JTpackets, JTlastComputedSkew, "JSONTest");
     }
     if(!WCdone){
-        document.getElementById("WorldClock").value += '\n M\u011B\u0159en\u00ED zru\u0161eno';
+        document.getElementById("WorldClock").value += '\n Measuring stopped';
         document.getElementById("WorldClock").style.border = "1px dashed #FF6159";
+        document.getElementById("WorldClock").scrollTop = document.getElementById("WorldClock").scrollHeight;
         WCdone = true;
-        plotPoints(WCpackets, 0,"WorldClock");
+        plotPoints(WCpackets, 0,"WorldClock", true, WClastKnownSkew);
+    }else if(WCerror){
+        if(document.getElementById("WorldClockskew").style.visibility = "hidden"){
+            document.getElementById("WorldClockskew").innerHTML = "Couldn't compute skew";
+            document.getElementById("WorldClockskew").style.position = 'static';
+            document.getElementById("WorldClockskew").style.visibility = 'visible';
+            document.getElementById("WorldClockskew").style.fontSize = "20px";
+            document.getElementById("WorldClock").style.border = "1px dashed #FF6159";
+        }
+    }else{
+        doPlot(WCpackets, WClastComputedSkew, "WorldClock");
     }
     if(!EVdone){
-        document.getElementById("Eva").value += '\n M\u011B\u0159en\u00ED zru\u0161eno';
+        document.getElementById("Eva").value += '\n Measuring stopped';
         document.getElementById("Eva").style.border = "1px dashed #FF6159";
+        document.getElementById("Eva").scrollTop = document.getElementById("Eva").scrollHeight;
         EVdone = true;
-        plotPoints(EVpackets, 0,"Eva"); 
-    }  
+        plotPoints(EVpackets, 0,"Eva", true, EVlastKnownSkew); 
+    }else if(EVerror){
+        if(document.getElementById("Evaskew").style.visibility = "hidden"){
+            document.getElementById("Evaskew").innerHTML = "Couldn't compute skew";
+            document.getElementById("Evaskew").style.position = 'static';
+            document.getElementById("Evaskew").style.visibility = 'visible';
+            document.getElementById("Evaskew").style.fontSize = "20px";
+            document.getElementById("Eva").style.border = "1px dashed #FF6159";
+        }
+    }else{
+        doPlot(EVpackets, EVlastComputedSkew, "Eva");
+    } 
+    document.getElementById('JTB').className = 'disabledB';
+    document.getElementById("JSONTestd").style.height = "354px";
+    document.getElementById('WCB').className = 'disabledB';
+    document.getElementById("WorldClockd").style.height = "354px";
+    document.getElementById('EVB').className = 'disabledB';
+    document.getElementById("Evad").style.height = "354px";
+    document.getElementById('stop').className = 'disabledB'; 
+    
+    document.getElementById("graphUpdate").innerHTML = "";
+    clearInterval(interval);
 }
 
 //Vypíše všechny informace z localStorage
@@ -147,6 +186,8 @@ function showWholeStorage(){
     document.getElementById("bigStorage").style.position = "absolute";
     document.getElementById("show").style.visibility = "hidden";
     document.getElementById("show").style.position = "absolute";
+    document.getElementById("onlyfive").style.visibility = "hidden";
+    document.getElementById("onlyfive").style.position = "absolute";
     
     JTstorage = [];
     WCstorage = [];
@@ -171,4 +212,49 @@ function showWholeStorage(){
     printStorage(JTstorage, "JSONTest");
     printStorage(WCstorage, "WorldClock");
     printStorage(EVstorage, "Eva");
+}
+
+function errorChangeGUI(name){
+    var buttonname = "";
+    var taname = "";
+
+    switch(name){
+        case "JT" : buttonname = "JTB"; taname = "JSONTest";break;
+        case "WC" : buttonname = "WCB"; taname = "WorldClock";break;
+        case "EV" : buttonname = "EVB"; taname = "Eva"; break;
+        default :
+    }
+
+    document.getElementById("JSONTestd").style.height = "389px";
+    document.getElementById("WorldClockd").style.height = "389px";
+    document.getElementById("Evad").style.height = "389px";
+
+    document.getElementById("JTB").style.position = "static";
+    document.getElementById("WCB").style.position = "static";
+    document.getElementById("EVB").style.position = "static";
+
+    document.getElementById(buttonname).className = "activeB";
+    document.getElementById(taname).value += '\n Server error';
+    document.getElementById(taname).scrollTop = document.getElementById("JSONTest").scrollHeight;
+}
+
+function errorButton(id){
+
+    switch(id){
+        case "JTB" : JTdone = false;document.getElementById("JSONTest").style.border = "none";break;
+        case "WCB" : WCdone = false;document.getElementById("WorldClock").style.border = "none";break;
+        case "EVB" : EVdone = false;document.getElementById("Eva").style.border = "none";break;
+    }
+
+    document.getElementById(id).className = "disabledB";
+
+    if(document.getElementById("JTB").className == "disabledB" && document.getElementById("WCB").className == "disabledB" && document.getElementById("EVB").className == "disabledB"){
+        document.getElementById("JSONTestd").style.height = "354px";
+        document.getElementById("WorldClockd").style.height = "354px";
+        document.getElementById("Evad").style.height = "354px";
+        
+        document.getElementById("JTB").style.position = "absolute";
+        document.getElementById("WCB").style.position = "absolute";
+        document.getElementById("EVB").style.position = "absolute";
+    }
 }
