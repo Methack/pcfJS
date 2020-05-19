@@ -235,15 +235,16 @@ function errorChangeGUI(name){
 
     document.getElementById(buttonname).className = "activeB";
     document.getElementById(taname).value += '\n Server error';
-    document.getElementById(taname).scrollTop = document.getElementById("JSONTest").scrollHeight;
+    document.getElementById(taname).scrollTop = document.getElementById(taname).scrollHeight;
+    document.getElementById(taname).style.border = "1px dashed #FF6159";
 }
 
 function errorButton(id){
 
     switch(id){
-        case "JTB" : JTdone = false;document.getElementById("JSONTest").style.border = "none";break;
-        case "WCB" : WCdone = false;document.getElementById("WorldClock").style.border = "none";break;
-        case "EVB" : EVdone = false;document.getElementById("Eva").style.border = "none";break;
+        case "JTB" : JTdone = false;document.getElementById("JSONTest").style.border = "1px solid #EEEEEE";break;
+        case "WCB" : WCdone = false;document.getElementById("WorldClock").style.border = "1px solid #EEEEEE";break;
+        case "EVB" : EVdone = false;document.getElementById("Eva").style.border = "1px solid #EEEEEE";break;
     }
 
     document.getElementById(id).className = "disabledB";

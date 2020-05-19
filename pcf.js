@@ -156,8 +156,8 @@ function computeCallSkew(packets){
     var tmp
     var level0 = 300;
     var level1 = 400;
-    var level2 = 500;
-    var level3 = 600;
+    var level2 = 600;
+    var level3 = 900;
     callSkewComputeTime = 2000;
     for (let i = 0; i < packets.length; i++) {
         tmp = packets[i].Client;
@@ -186,8 +186,11 @@ function computeCallSkew(packets){
         }
     }
     //level 3
-    if(callSkewComputeTime > level3)
-        callSkewComputeTime = level3;   
+    if(callSkewComputeTime > level3){
+        callSkewComputeTime = level3;
+        clearInterval(Interval);
+        interval = setInterval(CallThemAll, 1100);
+    }   
 }
 
 //Pomocí Plotly.js vytvoří graf
@@ -214,9 +217,9 @@ function plotPoints(packets, lastComputedSkew, name, final, lastKnownSkew){
     document.getElementById(skewid).style.visibility = 'visible';
     if(final){
         document.getElementById(skewid).style.fontSize = "20px";
+        document.getElementById(skewid).getElementsByTagName("span")[0].style.color = '#326EE6';  
         if(lastKnownSkew.Alpha != 0){
             document.getElementById(skewid).getElementsByTagName("span")[0].style.borderBottom = '2px dotted #326EE6';
-            document.getElementById(skewid).getElementsByTagName("span")[0].style.color = '#326EE6';  
             var tipid = name+"tip";
             document.getElementById(tipid).className = "ttiptext";
             document.getElementById(tipid).innerHTML = "Difference between expected ("+(lastKnownSkew.Alpha*1000).toFixed(6)+") and computed value is <b>" + (Math.abs(lastKnownSkew.Alpha - lastComputedSkew.Alpha)*1000).toFixed(6)+"</b> ppm";
@@ -240,7 +243,7 @@ function doPlot(packets, lastComputedSkew, name){
     var upperDatax = [Pointx[0], Pointx[Pointx.length-1]];
     var upper = {y:upperDatay, x:upperDatax, mode: 'lines', name : name};
     var data = [points, upper];
-    var plotlyOptions = { modeBarButtonsToRemove: ['sendDataToCloud', 'autoScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'lasso2d', 'select2d', 'toggleSpikelines', 'zoomIn2d', 'zoomOut2d', 'resetScale2d',  'pan2d'], showTips: true , displaylogo: false};
+    var plotlyOptions = { modeBarButtonsToRemove: ['sendDataToCloud', 'autoScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'lasso2d', 'select2d', 'toggleSpikelines', 'zoomIn2d', 'zoomOut2d',  'pan2d'], showTips: true , displaylogo: false};
     Plotly.plot('graf', data, {title:""},plotlyOptions);
     document.getElementById("graf").style.visibility = "visible";
 }
@@ -318,7 +321,6 @@ function getJsonTest(){
             JTdone = true; //Pokud přijde error, noposílají se dále nové requesty
             JTerror = true;
             errorChangeGUI("JT");
-            document.getElementById("JSONTest").style.border = "1px dashed #FF6159";
         }
     }
     requestTest.onload = function () {
@@ -354,7 +356,6 @@ function getWorldClock(){
             WCdone = true; //Pokud přijde error, noposílají se dále nové requesty
             WCerror = true;
             errorChangeGUI("WC");
-            document.getElementById("WorldClock").style.border = "1px dashed #FF6159";
         }
     }
     requestClock.onload = function () {
@@ -390,7 +391,6 @@ function getSkolniServer(){
             EVdone = true; //Pokud přijde error, noposílají se dále nové requesty
             EVerror = true;
             errorChangeGUI("EV");
-            document.getElementById("Eva").style.border = "1px dashed #FF6159";
         }
     }
     requestSkol.onload = function () {
@@ -524,8 +524,6 @@ function computeSkew(packets){
     result.Beta = Number(result.Beta.toFixed(9))*(-1);
     return result;
 }
-
-
 
 
 
