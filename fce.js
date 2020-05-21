@@ -3,6 +3,7 @@
 
 //Funkce vytváří nové elementy tabulky a vloží data z localStorage
 function printStorage(whichStorage, caption){
+    //Jedna iterace vytvoří elementy jednoho řádku
     for (let i = 0; i < whichStorage.length; i++) {
         id++;
         tr = document.createElement("tr");
@@ -10,16 +11,21 @@ function printStorage(whichStorage, caption){
         var prevtr = "tr"+(id-1);
         var capid = "cap"+id; 
         tr.setAttribute("id", trid);
+        //Čas
         var tdcas = document.createElement("td");
         var cas = new Date();
         cas.setTime(whichStorage[i].Time);
         tdcas.innerHTML = cas.toLocaleTimeString();
+        //Den
         var tdden = document.createElement("td");
         tdden.innerHTML = cas.toLocaleDateString();
+        //Doba měření
         var tdmereni = document.createElement("td");
         tdmereni.innerHTML = whichStorage[i].MeasureTime;
+        //Skew
         var tdalpha = document.createElement("td");
         tdalpha.innerHTML = (Number(whichStorage[i].Alpha)*1000).toFixed(6);
+        //Tlačítko na smazání
         var tdbutton = document.createElement("td");
         var x = document.createElement("img");
         x.onclick = function () {
@@ -42,13 +48,16 @@ function printStorage(whichStorage, caption){
         x.src = "styles/x.png";
         x.height = "15";
         tdbutton.appendChild(x);
+        //Připnutí elementů na element řádku <tr>
         tr.appendChild(tdden);
         tr.appendChild(tdcas);
         tr.appendChild(tdmereni);
         tr.appendChild(tdalpha);
         tr.appendChild(tdbutton);
+        //Nastavení classy pro poslední řádek daného serveru
         if(i == whichStorage.length-1 && caption != "Eva")
             tr.className = "lastTr";
+        //Přiřazení captionu
         switch(whichStorage.length){
             default :
             case 2 : if(i == 0){addCaption(caption)};break;
@@ -56,6 +65,7 @@ function printStorage(whichStorage, caption){
             case 4 : if(i == 1){addCaption(caption)};break;
             case 5 : if(i == 2){addCaption(caption)};break;
         }
+        //Přiřazení rádku do tabulky
         document.getElementById("TTab").appendChild(tr);
     }
 }
@@ -64,7 +74,7 @@ function printStorage(whichStorage, caption){
 function addCaption(caption){
     var cap = document.createElement("caption");
     cap.innerHTML = caption;
-    capid = "cap"+id;
+    var capid = "cap"+id;
     cap.setAttribute("id", capid);
     document.getElementById("TTab").appendChild(cap);
 }
@@ -91,10 +101,12 @@ function reduceStorageArray(whichStorage){
     var novyArray = [];
     for (let i = 0; i < whichStorage.length; i++) {
         if(novyArray.length < 5){
+            //Naplní pole 5ti prvky
             novyArray.push(whichStorage[i]);
             if(novyArray[nejmensi].MeasureTime >= novyArray[novyArray.length-1].MeasureTime)
                 nejmensi = novyArray.length-1;
         }else{
+            //Vyřazuje prvky pokud mají menší dobu měření
             if(novyArray[nejmensi].MeasureTime < whichStorage[i].MeasureTime){
                 novyArray[nejmensi] = whichStorage[i];
                 for (let j = 0; j < 5; j++) {
@@ -104,10 +116,11 @@ function reduceStorageArray(whichStorage){
                 }
             }
         }
+        //Pamatuje si nejnovější měření
         if(whichStorage[i].Time > whichStorage[nejnovejsi].Time)
             nejnovejsi = i;
     }
-    
+    //Pokud již v poli nění tak vloží nejnovější měření
     if(whichStorage[nejnovejsi].MeasureTime < novyArray[nejmensi].MeasureTime){
         novyArray.pop(nejmensi);
         novyArray.push(whichStorage[nejnovejsi]);
@@ -118,12 +131,14 @@ function reduceStorageArray(whichStorage){
 //Funkce zastaví zasílání packetů, tím zruší měření. Po ukončení měření se plotnou body. 
 function stopIt(){
     if(!JTdone){
+        //Pokud měření běží ukončí ho
         document.getElementById("JSONTest").value += '\n Measuring stopped';
         document.getElementById("JSONTest").style.border = "1px dashed #FF6159";
         document.getElementById("JSONTest").scrollTop = document.getElementById("JSONTest").scrollHeight;
         JTdone = true;
         plotPoints(JTpackets, 0, "JSONTest", true, JTlastKnownSkew);
     }else if(JTerror){
+        //Pokud server poslal error
         if(document.getElementById("JSONTestskew").style.visibility = "hidden"){
             document.getElementById("JSONTestskew").innerHTML = "Couldn't compute skew";
             document.getElementById("JSONTestskew").style.position = 'static';
@@ -168,6 +183,7 @@ function stopIt(){
     }else{
         doPlot(EVpackets, EVlastComputedSkew, "Eva");
     } 
+    //Vypně tlačítka pro errory
     document.getElementById('JTB').className = 'disabledB';
     document.getElementById("JSONTestd").style.height = "354px";
     document.getElementById('WCB').className = 'disabledB';
@@ -175,7 +191,7 @@ function stopIt(){
     document.getElementById('EVB').className = 'disabledB';
     document.getElementById("Evad").style.height = "354px";
     document.getElementById('stop').className = 'disabledB'; 
-    
+
     document.getElementById("graphUpdate").innerHTML = "";
     clearInterval(interval);
 }
@@ -193,6 +209,7 @@ function showWholeStorage(){
     WCstorage = [];
     EVstorage = [];
 
+    //Čte prvky z localStorage a přiřazuje je serverům
     for (let index = 0; index < localStorage.length; index++) {
         key = localStorage.key(index);
         item = localStorage.getItem(key).split(",");
@@ -214,6 +231,7 @@ function showWholeStorage(){
     printStorage(EVstorage, "Eva");
 }
 
+//Zobrazí error button pro konkrétní server
 function errorChangeGUI(name){
     var buttonname = "";
     var taname = "";
@@ -224,23 +242,26 @@ function errorChangeGUI(name){
         case "EV" : buttonname = "EVB"; taname = "Eva"; break;
         default :
     }
-
+    //Rozšíří divy aby se tam vešli buttony
     document.getElementById("JSONTestd").style.height = "389px";
     document.getElementById("WorldClockd").style.height = "389px";
     document.getElementById("Evad").style.height = "389px";
 
+    //Nastaví aby s buttony počítali ostatní prvky
     document.getElementById("JTB").style.position = "static";
     document.getElementById("WCB").style.position = "static";
     document.getElementById("EVB").style.position = "static";
 
+    //Aktivuje konkrétní button serveru co poslal error
     document.getElementById(buttonname).className = "activeB";
     document.getElementById(taname).value += '\n Server error';
     document.getElementById(taname).scrollTop = document.getElementById(taname).scrollHeight;
     document.getElementById(taname).style.border = "1px dashed #FF6159";
 }
 
+//Volá se po zmáčknutí error buttonu, zase aktivuje server co poslal error
 function errorButton(id){
-
+    //Nastaví defaultní border pro textareu
     switch(id){
         case "JTB" : JTdone = false;document.getElementById("JSONTest").style.border = "1px solid #EEEEEE";break;
         case "WCB" : WCdone = false;document.getElementById("WorldClock").style.border = "1px solid #EEEEEE";break;
@@ -248,7 +269,7 @@ function errorButton(id){
     }
 
     document.getElementById(id).className = "disabledB";
-
+    //Pokud jsou všechny servery aktivní, deaktivuje error buttony a zmenší divy
     if(document.getElementById("JTB").className == "disabledB" && document.getElementById("WCB").className == "disabledB" && document.getElementById("EVB").className == "disabledB"){
         document.getElementById("JSONTestd").style.height = "354px";
         document.getElementById("WorldClockd").style.height = "354px";
@@ -258,4 +279,47 @@ function errorButton(id){
         document.getElementById("WCB").style.position = "absolute";
         document.getElementById("EVB").style.position = "absolute";
     }
+}
+
+//Zobrazí div a vypíše do něj informace
+function showInfo(which){
+    document.getElementById("infodiv").style.visibility = "visible";
+    var text = "";
+    switch(which){
+        case "texta" : 
+            text = "<b>Textareas</b> contain times from server and client. These times are shown like this: <br>"+
+                    "Time since start from server -- Time since start from client<br><br>"+
+                    "These time are obtained once per second by getting current timestamp from server/client and subtracting first timestamp from them.<br><br><hr><br>"+
+                    "We use these times in computation of <b>clock skew</b>. Which is displayed bellow textareas once computed.<br><br>"+
+                    "If the computed clock skew is final, its font size will be larger.<br><br>"+
+                    "If there are records of previous measurements, you can get more information, by hovering over number of final clock skew.<br>"+
+                    "(You can tell its available when final clock skew has dotted line under it)<br><br><hr><br>"+
+                    "If measuring was successful respective server will have green border around textarea. Unsuccessful measuring will have red border.<br><br>"+
+                    "After successful measuring, computed skew will be saved in local storage and displayed in table bellow on next visit.";
+            break;
+        case "graf" :
+            text = "<b>Graph</b> is interactive. You can zoom by clicking and dragging.<br><br>"+
+                    "To reset axes (zoom out) double click inside graph or click on <b>Reset axes</b> button in top right corner.<br><br>"+
+                    "By clicking on trace in legend you can show/hide it.<br><br>"+
+                    "By double clicking on single trace in legend you can isolate it.<br><br><hr><br>"+
+                    "<b>Graph</b> contains information about timestamps and clock skew.<br><br>"+
+                    "<b>Y axes</b> is offset. We get offset by subtracting server time from client time.<br>"+
+                    "<b>X axes</b> is server time. Server time is shown in textareas.<br><br>"+
+                    "Lines are lower bounds of respective points. Angle between line and x axes is clock skew of the Client.<br><br>"+
+                    "For each server there are shown points with their respective line.";
+            break;
+        case "predesle" :
+            break;
+
+        default:
+            document.getElementById("infodiv").style.visibility = "hidden";
+            return;
+    }
+    document.getElementById("info").innerHTML = text;
+}
+
+//Schová div s informacemi 
+function clearInfo(){
+    document.getElementById('infodiv').style.visibility='hidden';
+    document.getElementById("info").innerHTML = "";
 }

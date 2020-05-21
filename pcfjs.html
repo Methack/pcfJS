@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
 		<title>PC Fingerprinter JS</title>
 		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	    <meta name="description" content="Clock skew calculation">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="styles/styles.css">
@@ -19,10 +19,18 @@
                 <span id="graphUpdate">Graph update in : 00s</span>
                 <button id="stop" onclick="stopIt();">Stop</button>
             </div>
-            <div class="hlavni", id="texta">
+            <div id="infodiv">
+                <div id="infotext">
+                    <h2><img src="styles/i.png">Information</h2>
+                    <p id="info"></p>
+                    <button class="activeB" onclick="clearInfo();">Close</button>
+                </div>
+            </div>
+            <div class="hlavni" id="texta">
+                <img src="styles/i.png" alt="Information" class="information" onclick="showInfo('texta')">
                 <div id="JSONTestd">
                     <label>JSONTest</label>
-                    <textarea id="JSONTest" readonly="readonly">ServerTimeSinceStart -- ClientTimeSinceStart</textarea>
+                    <textarea id="JSONTest" readonly="readonly" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">ServerTimeSinceStart -- ClientTimeSinceStart</textarea>
                     <div class="ttip">
                         <p id="JSONTestskew">Skew is </p>
                         <span id="JSONTesttip"></span>
@@ -31,7 +39,7 @@
                 </div>
                 <div id="WorldClockd">
                     <label>WorldClock</label>
-                    <textarea id="WorldClock" readonly="readonly">ServerTimeSinceStart -- ClientTimeSinceStart</textarea>
+                    <textarea id="WorldClock" readonly="readonly" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">ServerTimeSinceStart -- ClientTimeSinceStart</textarea>
                     <div class="ttip">
                         <p id="WorldClockskew">Skew is </p>
                         <span id="WorldClocktip"></span>
@@ -40,7 +48,7 @@
                 </div>
                 <div id="Evad">
                     <label>Eva</label>
-                    <textarea id="Eva" readonly="readonly">ServerTimeSinceStart -- ClientTimeSinceStart</textarea>
+                    <textarea id="Eva" readonly="readonly" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">ServerTimeSinceStart -- ClientTimeSinceStart</textarea>
                     <div class="ttip">
                         <p id="Evaskew">Skew is </p>
                         <span id="Evatip"></span>
@@ -48,7 +56,11 @@
                     <button onclick="if(EVdone){errorButton('EVB');}" class="disabledB" id="EVB">Try Evu again</button>
                 </div>
             </div>
-            <div id="graf" class="hlavni"></div>
+            <div id="grafobal" class="hlavni">
+                <img src="styles/i.png" alt="Information" class="information" onclick="showInfo('graf')">
+                <div id="graf">
+                </div>
+            </div>
             <div id="predesle" class="hlavni">
                 <h1>Previous measurements</h1>
                 <div id="obalT">
@@ -75,6 +87,14 @@
         CallThemAll();
         var interval = setInterval(CallThemAll, (intervalTime));
 
+
+        //Přidá onclick divu pro informace. Když jsou ukázané informace stačí kliknout na šedý prostor a informace se zavřou, pokud se klikne na bílí nic se nestane.
+        document.getElementById("infodiv").onclick = function (e){
+            var ev = e || window.event;
+            if(e.target === this)
+                clearInfo();
+        };
+
         if(localStorage.length != 0){
             var item = {Alpha:"", Beta:""};
             var key;
@@ -82,6 +102,7 @@
             var WCstorage = [];
             var EVstorage = [];
             var JTstorage = [];
+            //Čte prvky z localStorage a přiřazuje je serverům
             for (let index = 0; index < localStorage.length; index++) {
                 key = localStorage.key(index);
                 item = localStorage.getItem(key).split(",");
@@ -93,6 +114,7 @@
                 }
             }
 
+            //Pokud má nějaký server více jak 5 měření, redukuje jejich počet na 5
             var storageMessage = "More measurement records aren't shown :";
             if(JTstorage.length > 5){
                 var pastLen = JTstorage.length;

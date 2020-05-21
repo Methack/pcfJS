@@ -5,13 +5,13 @@ var intervalTime = 1000;
 var minPacketCount = 100;
 
 //Kolik musí uběhnout času pro provádění výpočtu (v s) (v případě prvního měření na zařízení)
-var minTime = 100;  //default asi 1200
+var minTime = 100; 
 
 //Určují jak často se bude volat počítání skew (v s)
 var callSkewComputeTime = 300;
 
 //Limit (v s) do kdy se musí stihnout vypočítat skew, jinak se výpočet zruší
-var endWhen = 3620;
+var endWhen = 9620;
 
 //Pomocné proměnné
 var maxTime = 0;
@@ -51,13 +51,14 @@ function CallThemAll(){
 
     //Výpočet jak často se bude počítat skew
     if(callSkewCompute == 0){
+        //Čeká se až bude mít některý server 50packetů (50 protože při použití levelu2 je vysoká šance, že bude několik packetů (až 30) za sebou vypadat jako při levelu3)
         if(JTpackets.length == 50)
             computeCallSkew(JTpackets);
         else if(WCpackets.length == 50)
             computeCallSkew(WCpackets);
         else if(EVpackets.length == 50)
             computeCallSkew(EVpackets);
-
+        //Počítá kolik musí přijít nových packetů aby se zavolal computeSkew
         if(JTpackets.length >= 50 || WCpackets.length >= 50 || EVpackets >= 50){
             callSkewCompute = Math.round(callSkewComputeTime / (intervalTime/1000));
             if(callSkewCompute < 6)
@@ -67,35 +68,27 @@ function CallThemAll(){
     }
 
 
-    //Update graf
+    //Updatuje graf
     if(graphUpdate == 0){
         graphUpdate = defaultGraphUpdate;
-        var traces = [];
-        if(!JTerror){
-            if(JTdone)
-                doPlot(JTpackets, JTlastComputedSkew, "JSONTest");
-            else
-                plotPoints(JTpackets, 0, "JSONTest", false);
+        //Pouze když server nemá error a měření stále probíhá
+        //Pokud byl výpočet dokončen plotne s znovu sám, dále se již nemění
+        if(!JTerror && !JTdone){
+            plotPoints(JTpackets, 0, "JSONTest", false);
         }
 
-        if(!WCerror){
-            if(WCdone && !WCerror)
-                doPlot(WCpackets, WClastComputedSkew, "WorldClock");
-            else
-                plotPoints(WCpackets, 0, "WorldClock", false);
+        if(!WCerror && !WCdone){
+            plotPoints(WCpackets, 0, "WorldClock", false);
         }
 
-        if(!EVerror){
-            if(EVdone && !EVerror)
-                doPlot(EVpackets, EVlastComputedSkew, "Eva");
-            else
-                plotPoints(EVpackets, 0, "Eva", false);
+        if(!EVerror && !EVdone){
+            plotPoints(EVpackets, 0, "Eva", false);
         }
     }
     if(graphUpdate < 10)
-        korekce = "0";
+        var korekce = "0";
     else
-        korekce = "";
+        var korekce = "";
     document.getElementById("graphUpdate").innerHTML = "Graph update in : "+korekce+graphUpdate+"s";
     graphUpdate--;
     
@@ -133,7 +126,7 @@ function CallThemAll(){
     if(!EVdone)
         getSkolniServer();
 
-    //Měření je zkončilo
+    //Měření zkončilo
     if(JTdone && WCdone && EVdone){
         clearInterval(interval);
 
@@ -185,10 +178,10 @@ function computeCallSkew(packets){
             }
         }
     }
-    //level 3
+    //level 3 -> zpomalí i intervalTime na 1100ms (z 1000ms)
     if(callSkewComputeTime > level3){
         callSkewComputeTime = level3;
-        clearInterval(Interval);
+        clearInterval(interval);
         interval = setInterval(CallThemAll, 1100);
     }   
 }
@@ -199,6 +192,7 @@ function plotPoints(packets, lastComputedSkew, name, final, lastKnownSkew){
     if(lastComputedSkew == 0){
         if(packets.length > 20){
             var lastComputedSkew = computeSkew(packets);
+            //Pokus je Alpha moc velké číslo, napíše se compute skew error
             if(lastComputedSkew.Alpha === ""){
                 console.log(name+" computeSkew error (Alpha > 100)");
                 document.getElementById(skewid).innerHTML = 'Skew compute error';
@@ -207,24 +201,29 @@ function plotPoints(packets, lastComputedSkew, name, final, lastKnownSkew){
                 return;
             }
         }else{
+            //Pokud má moc málo packetů (když má málo packetů háže hull[j] undefined)
             document.getElementById(skewid).innerHTML = 'Not enough packets to compute skew';
             document.getElementById(skewid).style.visibility = 'visible';
             document.getElementById(skewid).style.fontSize = "20px";
             return;
         }
     }
-    document.getElementById(skewid).innerHTML = 'Skew is <span>'+(lastComputedSkew.Alpha*1000).toFixed(6)+'</span> ppm';
-    document.getElementById(skewid).style.visibility = 'visible';
     if(final){
+        //final je true když je výpočet dokončen
         document.getElementById(skewid).style.fontSize = "20px";
         document.getElementById(skewid).getElementsByTagName("span")[0].style.color = '#326EE6';  
+        document.getElementById(skewid).innerHTML = 'Skew is <span>'+(lastComputedSkew.Alpha*1000).toFixed(6)+'</span> ppm';
         if(lastKnownSkew.Alpha != 0){
             document.getElementById(skewid).getElementsByTagName("span")[0].style.borderBottom = '2px dotted #326EE6';
             var tipid = name+"tip";
             document.getElementById(tipid).className = "ttiptext";
             document.getElementById(tipid).innerHTML = "Difference between expected ("+(lastKnownSkew.Alpha*1000).toFixed(6)+") and computed value is <b>" + (Math.abs(lastKnownSkew.Alpha - lastComputedSkew.Alpha)*1000).toFixed(6)+"</b> ppm";
         }
+    }else{
+        //Pokud je to mezivýpočet
+        document.getElementById(skewid).innerHTML = 'Estimated skew is <span>'+(lastComputedSkew.Alpha*1000).toFixed(6)+'</span> ppm';
     }
+    document.getElementById(skewid).style.visibility = 'visible';
     doPlot(packets, lastComputedSkew, name);
 }
 
@@ -239,13 +238,14 @@ function doPlot(packets, lastComputedSkew, name){
     }
 
     var points = {y:Pointy, x:Pointx, mode: 'markers', type: 'scatter', name : name};
+    //Počítá upperbound, kvůli tomu že se počítá skew clienta a ne serveru potřebujem lowerbound, proto se to násobí -1. Skew už -1 vynásobené je
     var upperDatay = [(Pointx[0] * lastComputedSkew.Alpha + lastComputedSkew.Beta), Pointx[Pointy.length-1] * lastComputedSkew.Alpha + lastComputedSkew.Beta];
     var upperDatax = [Pointx[0], Pointx[Pointx.length-1]];
     var upper = {y:upperDatay, x:upperDatax, mode: 'lines', name : name};
     var data = [points, upper];
     var plotlyOptions = { modeBarButtonsToRemove: ['sendDataToCloud', 'autoScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'lasso2d', 'select2d', 'toggleSpikelines', 'zoomIn2d', 'zoomOut2d',  'pan2d'], showTips: true , displaylogo: false};
     Plotly.plot('graf', data, {title:""},plotlyOptions);
-    document.getElementById("graf").style.visibility = "visible";
+    document.getElementById("grafobal").style.visibility = "visible";
 }
 
 //Funkce smaže trace z grafu (pokud v grafu jsou)
@@ -269,8 +269,9 @@ function deletePlotted(name){
 
 //Vypočítá nové skew a porovná ho s tím které dostane v argumentu, pokud se jejich rozdíl vleze do limitu ukončí výpočet dáného serveru.
 function checkAndPlot(packets, lastComputedSkew, name, lastKnownSkew){
-    result = computeSkew(packets);
+    var result = computeSkew(packets);
 
+    //Skew je moc velké číslo
     if(result.Alpha === ""){
         console.log(name+" computeSkew error (Alpha > 100)");
         return result;
@@ -279,9 +280,9 @@ function checkAndPlot(packets, lastComputedSkew, name, lastKnownSkew){
     console.log(name +" ("+Math.round(packets[packets.length-1].Client)+"s) skew is "+(result.Alpha*1000).toFixed(6)+" ppm, beta is "+result.Beta);
 
     if(lastComputedSkew.Alpha != 0){
+        //Kontrola jestli jsi jsou poslední dvě vypočítané skew podobné
         if(Math.abs(lastComputedSkew.Alpha - result.Alpha) < 0.001){
             lastComputedSkew = result;
-
             switch(name){
                 case "WorldClock":
                     document.getElementById("WorldClock").value += '\n Measuring successful';
@@ -305,6 +306,7 @@ function checkAndPlot(packets, lastComputedSkew, name, lastKnownSkew){
 
             plotPoints(packets, lastComputedSkew, name, true, lastKnownSkew);
 
+            //Uloží skew do localStorage, key je 'jméno-unixtime'
             var key = name + "-" + Date.now().toString();
             localStorage.setItem(key, [lastComputedSkew.Alpha,lastComputedSkew.Beta, Math.round(packets[packets.length-1].Client)]);
         }
@@ -320,7 +322,7 @@ function getJsonTest(){
         if(!JTdone){
             JTdone = true; //Pokud přijde error, noposílají se dále nové requesty
             JTerror = true;
-            errorChangeGUI("JT");
+            errorChangeGUI("JT"); //Aktivuje příslušný button
         }
     }
     requestTest.onload = function () {
@@ -340,6 +342,7 @@ function getJsonTest(){
             document.getElementById("JSONTest").value += '\n' + server + ' -- ' + client;
             document.getElementById("JSONTest").scrollTop = document.getElementById("JSONTest").scrollHeight;
             maxTime = client;
+            //Check se volá pokud má dostatečné množství packetů, ubyl dostateční čas od začátku měření a počet packetů je dělitelný callSkewCompute
             if(JTpackets.length > minPacketCount && JTpackets.length % callSkewCompute == 0 && JTpackets[JTpackets.length-1].Client > minTime)
                 JTlastComputedSkew = checkAndPlot(JTpackets, JTlastComputedSkew, "JSONTest", JTlastKnownSkew);
         }
@@ -355,7 +358,7 @@ function getWorldClock(){
         if(!WCdone){
             WCdone = true; //Pokud přijde error, noposílají se dále nové requesty
             WCerror = true;
-            errorChangeGUI("WC");
+            errorChangeGUI("WC"); //Aktivuje příslušný button
         }
     }
     requestClock.onload = function () {
@@ -375,6 +378,7 @@ function getWorldClock(){
             document.getElementById("WorldClock").value += '\n' + server + ' -- ' + client;
             document.getElementById("WorldClock").scrollTop = document.getElementById("WorldClock").scrollHeight;
             maxTime = client;
+            //Check se volá pokud má dostatečné množství packetů, ubyl dostateční čas od začátku měření a počet packetů je dělitelný callSkewCompute
             if(WCpackets.length > minPacketCount && WCpackets.length % callSkewCompute == 0 && WCpackets[WCpackets.length-1].Client > minTime)
                 WClastComputedSkew = checkAndPlot(WCpackets, WClastComputedSkew, "WorldClock", WClastKnownSkew);
         }
@@ -390,7 +394,7 @@ function getSkolniServer(){
         if(!EVdone){
             EVdone = true; //Pokud přijde error, noposílají se dále nové requesty
             EVerror = true;
-            errorChangeGUI("EV");
+            errorChangeGUI("EV"); //Aktivuje příslušný button
         }
     }
     requestSkol.onload = function () {
@@ -410,6 +414,7 @@ function getSkolniServer(){
             document.getElementById("Eva").value += '\n' + server + ' -- ' + client;
             document.getElementById("Eva").scrollTop = document.getElementById("Eva").scrollHeight;
             maxTime = client;
+            //Check se volá pokud má dostatečné množství packetů, ubyl dostateční čas od začátku měření a počet packetů je dělitelný callSkewCompute
             if(EVpackets.length > minPacketCount && EVpackets.length % callSkewCompute == 0 && EVpackets[EVpackets.length-1].Client > minTime)
                 EVlastComputedSkew = checkAndPlot(EVpackets, EVlastComputedSkew, "Eva", EVlastKnownSkew);
         }
@@ -471,8 +476,8 @@ function computeSkew(packets){
         packets_count = i;
     }
 
-    data = convexHull(points, packets_count);
-    hull = data[0];
+    var data = convexHull(points, packets_count);
+    var hull = data[0];
     packets_count = data[1];
 
     var alpha;
@@ -520,6 +525,7 @@ function computeSkew(packets){
         }
     }
 
+    //Násobí se -1 kvůli tomu, že se počítá skew clienta vůči serveru. Proto když je vysoký offset je to velké kladné číslo -> místo upperbound zapotřebí lowerbound
     result.Alpha = Number(result.Alpha.toFixed(9))*(-1);
     result.Beta = Number(result.Beta.toFixed(9))*(-1);
     return result;
