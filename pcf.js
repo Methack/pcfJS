@@ -17,7 +17,7 @@ var endWhen = 9620;
 var maxTime = 0;
 var callSkewCompute = 0;
 var defaultGraphUpdate = 99;
-var graphUpdate = 30;
+var graphUpdate = 40;
 
 //JSONTestApi
 var JTpackets = [];
@@ -149,7 +149,7 @@ function computeCallSkew(packets){
     var tmp
     var level0 = 300;
     var level1 = 400;
-    var level2 = 600;
+    var level2 = 500;
     var level3 = 900;
     callSkewComputeTime = 2000;
     for (let i = 0; i < packets.length; i++) {
@@ -189,6 +189,9 @@ function computeCallSkew(packets){
 //Pomocí Plotly.js vytvoří graf
 function plotPoints(packets, lastComputedSkew, name, final, lastKnownSkew){
     var skewid = name+"skew";
+    if(final){
+        document.getElementById(skewid).style.fontSize = "20px";
+    }
     if(lastComputedSkew == 0){
         if(packets.length > 20){
             var lastComputedSkew = computeSkew(packets);
@@ -197,22 +200,19 @@ function plotPoints(packets, lastComputedSkew, name, final, lastKnownSkew){
                 console.log(name+" computeSkew error (Alpha > 100)");
                 document.getElementById(skewid).innerHTML = 'Skew compute error';
                 document.getElementById(skewid).style.visibility = 'visible';
-                document.getElementById(skewid).style.fontSize = "20px";
                 return;
             }
         }else{
             //Pokud má moc málo packetů (když má málo packetů háže hull[j] undefined)
             document.getElementById(skewid).innerHTML = 'Not enough packets to compute skew';
             document.getElementById(skewid).style.visibility = 'visible';
-            document.getElementById(skewid).style.fontSize = "20px";
             return;
         }
     }
     if(final){
         //final je true když je výpočet dokončen
-        document.getElementById(skewid).style.fontSize = "20px";
-        document.getElementById(skewid).getElementsByTagName("span")[0].style.color = '#326EE6';  
         document.getElementById(skewid).innerHTML = 'Skew is <span>'+(lastComputedSkew.Alpha*1000).toFixed(6)+'</span> ppm';
+        document.getElementById(skewid).getElementsByTagName("span")[0].style.color = '#326EE6';
         if(lastKnownSkew.Alpha != 0){
             document.getElementById(skewid).getElementsByTagName("span")[0].style.borderBottom = '2px dotted #326EE6';
             var tipid = name+"tip";
@@ -243,8 +243,10 @@ function doPlot(packets, lastComputedSkew, name){
     var upperDatax = [Pointx[0], Pointx[Pointx.length-1]];
     var upper = {y:upperDatay, x:upperDatax, mode: 'lines', name : name};
     var data = [points, upper];
+    var xaxis = {title: {text: 'Time since start [s]',font: {size: 18,color: '#326EE6'}}};
+    var yaxis = {title: {text: 'Offset [ms]',font: {size: 18,color: '#326EE6'}}};
     var plotlyOptions = { modeBarButtonsToRemove: ['sendDataToCloud', 'autoScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'lasso2d', 'select2d', 'toggleSpikelines', 'zoomIn2d', 'zoomOut2d',  'pan2d'], showTips: true , displaylogo: false};
-    Plotly.plot('graf', data, {title:""},plotlyOptions);
+    Plotly.plot('graf', data, {xaxis:xaxis, yaxis:yaxis},plotlyOptions);
     document.getElementById("grafobal").style.visibility = "visible";
 }
 

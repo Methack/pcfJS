@@ -295,7 +295,8 @@ function showInfo(which){
                     "If there are records of previous measurements, you can get more information, by hovering over number of final clock skew.<br>"+
                     "(You can tell its available when final clock skew has dotted line under it)<br><br><hr><br>"+
                     "If measuring was successful respective server will have green border around textarea. Unsuccessful measuring will have red border.<br><br>"+
-                    "After successful measuring, computed skew will be saved in local storage and displayed in table bellow on next visit.";
+                    "After successful measuring, computed skew will be saved in local storage and displayed in table bellow on next visit.<br><br><hr><br>"+
+                    "Graph will appear after 40 seconds of measuring.";
             break;
         case "graf" :
             text = "<b>Graph</b> is interactive. You can zoom by clicking and dragging.<br><br>"+
@@ -303,8 +304,8 @@ function showInfo(which){
                     "By clicking on trace in legend you can show/hide it.<br><br>"+
                     "By double clicking on single trace in legend you can isolate it.<br><br><hr><br>"+
                     "<b>Graph</b> contains information about timestamps and clock skew.<br><br>"+
-                    "<b>Y axes</b> is offset. We get offset by subtracting server time from client time.<br>"+
-                    "<b>X axes</b> is server time. Server time is shown in textareas.<br><br>"+
+                    "<b>Y axes</b> represents offset. We get offset by subtracting server time from client time.<br>"+
+                    "<b>X axes</b> represents server time. Server time is shown in textareas.<br><br>"+
                     "Lines are lower bounds of respective points. Angle between line and x axes is clock skew of the Client.<br><br>"+
                     "For each server there are shown points with their respective line.";
             break;

@@ -202,12 +202,13 @@ textarea {
     min-width: 1020px;
 }
 
-#top span{
+#grafobal span{
     font-size: 25px;
     left:50%;
     position:absolute;
     transform: translateX(-50%);
     top: 18px;
+    z-index: 1;
     font-weight: bold;
 }
 
