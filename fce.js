@@ -1,4 +1,10 @@
-//Tento soubor obsahuje pomocné funkce, primárně pro výpis dat z localStorage
+/**************************************************************/
+/*     Michal Jireš (xjires02), 2020                          */
+/*                                                            */
+/*     Stránka vznikla jako součást bakalářské práce          */
+/*                                                            */
+/*     Tento soubor obsahuje pomocné funkce pro změny GUI     */
+/**************************************************************/
 
 
 //Funkce vytváří nové elementy tabulky a vloží data z localStorage

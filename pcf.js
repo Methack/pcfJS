@@ -1,3 +1,11 @@
+/*********************************************************/
+/*     Michal Jireš (xjires02), 2020                     */
+/*                                                       */
+/*     Stránka vznikla jako součást bakalářské práce     */
+/*                                                       */
+/*     Tento soubor obsahuje funkce pro výpočet skew     */
+/*********************************************************/
+
 //Rychlost posílání requestů v ms  
 var intervalTime = 1000;
 
@@ -11,7 +19,7 @@ var minTime = 100;
 var callSkewComputeTime = 300;
 
 //Limit (v s) do kdy se musí stihnout vypočítat skew, jinak se výpočet zruší
-var endWhen = 9620;
+var endWhen = 10820;
 
 //Pomocné proměnné
 var maxTime = 0;
@@ -45,7 +53,6 @@ var EVstarttimes = {Server:0, Client:0};
 
 
  
-
 
 function CallThemAll(){
 
@@ -183,6 +190,7 @@ function computeCallSkew(packets){
         callSkewComputeTime = level3;
         clearInterval(interval);
         interval = setInterval(CallThemAll, 1100);
+        graphUpdate = 90;
     }   
 }
 
